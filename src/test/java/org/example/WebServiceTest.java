@@ -13,7 +13,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = WsClientConfig.class, loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration(classes = {
+  WsClientConfig.class
+}, loader = AnnotationConfigContextLoader.class)
 public class WebServiceTest extends TestSupport {
   // region Fields
 

@@ -1,5 +1,6 @@
 package org.example.soap;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -9,6 +10,7 @@ import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
 @Configuration
+@Slf4j
 public class WsClientConfig {
 
   // region Fields
@@ -22,6 +24,16 @@ public class WsClientConfig {
     SaajSoapMessageFactory messageFactory = new SaajSoapMessageFactory();
     messageFactory.setSoapVersion(SoapVersion.SOAP_12);
     return messageFactory;
+  }
+
+  @Bean
+  public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller, WebServiceMessageFactory messageFactory) {
+
+    log.info("create new webServiceTemplate");
+    WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory);
+    webServiceTemplate.setMarshaller(marshaller);
+    webServiceTemplate.setUnmarshaller(marshaller);
+    return webServiceTemplate;
   }
 
   /**
@@ -41,15 +53,6 @@ public class WsClientConfig {
     return marshaller;
   }
 
-  @Bean
-  public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller, WebServiceMessageFactory messageFactory) {
-
-    WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory);
-    webServiceTemplate.setMarshaller(marshaller);
-    webServiceTemplate.setUnmarshaller(marshaller);
-    return webServiceTemplate;
-  }
-
   /**
    * 設定 WebService Client
    *
@@ -65,7 +68,7 @@ public class WsClientConfig {
     client.setMarshaller(marshaller);// 指定轉換類
     client.setUnmarshaller(marshaller);
     // 改變預設的 SOAP (1.1 -> 1.2)
-//    client.setMessageFactory(messageFactory);
+    //    client.setMessageFactory(messageFactory);
     return client;
   }
   // endregion
