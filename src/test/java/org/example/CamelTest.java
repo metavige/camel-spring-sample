@@ -1,10 +1,5 @@
 package org.example;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.Expression;
-import org.apache.camel.Processor;
-import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.dataformat.bindy.csv.BindyCsvDataFormat;
@@ -15,14 +10,11 @@ import org.example.data.MasterData;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.validation.annotation.Validated;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -39,15 +31,13 @@ public class CamelTest extends CamelTestSupport {
 
   @Value("classpath:data/sample-master.txt") Resource masterRes;
   @Value("classpath:data/sample.txt") Resource composeRes;
-  //  @Autowired
-  //  CompositeDataConverter converter;
+
   // endregion
 
   // region Methods
 
   /**
    * 測試抓出 MockEndpoint 的資料，並判斷結果
-   *
    * @throws Exception
    */
   @Test
@@ -157,8 +147,12 @@ public class CamelTest extends CamelTestSupport {
 
   }
 
+  /**
+   * 測試 Split + Aggregator
+   * @throws Exception
+   */
   @Test
-  public void testSplitMaster() throws Exception {
+  public void testSplitAggregate() throws Exception {
 
     // 1. Assign
     context.addRoutes(new RouteBuilder() {
@@ -170,14 +164,7 @@ public class CamelTest extends CamelTestSupport {
           .split()
             .tokenize(System.lineSeparator(), 1)
             .aggregationStrategy(new CompositeAggregateStrategy())
-          //.log("${exchangeProperty.CamelSplitIndex}")
-            .setHeader("myId", new Expression(){
-
-              @Override public <T> T evaluate(Exchange exchange, Class<T> type) {
-
-                return (T) exchange.getIn().getHeader("myId");
-              }
-            })
+            //.log("${exchangeProperty.CamelSplitIndex}")
             .choice()
               .when(simple("${exchangeProperty.CamelSplitIndex} == 0"))
                 .unmarshal(new BindyCsvDataFormat(MasterData.class))
@@ -185,9 +172,6 @@ public class CamelTest extends CamelTestSupport {
                 .unmarshal(new BindyCsvDataFormat(DetailData.class))
             .end()
           .end()
-          // 根據某一個 header 的值，來做 aggregate 的 correlation
-//          .aggregate(header("myId"), new CompositeAggregateStrategy())
-//          .completionPredicate(m -> m.getProperty("CamelSplitIndex") != m.getProperty("CamelSplitSize"))
           .to("mock:out");
       }
     });
