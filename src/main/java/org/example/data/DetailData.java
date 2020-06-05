@@ -1,12 +1,8 @@
 package org.example.data;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
-
-import java.util.Date;
 
 @Data
 @CsvRecord(separator = "&&&")

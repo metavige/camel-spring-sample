@@ -1,9 +1,6 @@
 package org.example;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
-import org.apache.camel.TypeConversionException;
-import org.apache.camel.TypeConverter;
 import org.apache.camel.support.TypeConverterSupport;
 import org.example.data.CompositeData;
 import org.example.data.DetailData;
@@ -13,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class CompositeDataConverter extends TypeConverterSupport {
   // region Fields
 
@@ -21,8 +17,7 @@ public class CompositeDataConverter extends TypeConverterSupport {
 
   // region Methods
 
-  @Override public <T> T convertTo(Class<T> type, Exchange exchange, Object value)
-    throws TypeConversionException {
+  @Override public <T> T convertTo(Class<T> type, Exchange exchange, Object value) {
 
     if (value.getClass().equals(String.class)) {
 
@@ -32,7 +27,7 @@ public class CompositeDataConverter extends TypeConverterSupport {
 
       List<DetailData> details = Arrays.stream(splitLines)
         .skip(1)
-        .map(s -> convertDetail(s))
+        .map(this::convertDetail)
         .collect(Collectors.toList());
 
       CompositeData aCompositeData = new CompositeData();
