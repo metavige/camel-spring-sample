@@ -92,16 +92,16 @@
             <groupId>wsdl4j</groupId>
             <artifactId>wsdl4j</artifactId>
         </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework</groupId>-->
-<!--            <artifactId>spring-oxm</artifactId>-->
-<!--            <version>5.2.6.RELEASE</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.ws</groupId>-->
-<!--            <artifactId>spring-ws-core</artifactId>-->
-<!--            <version>3.0.9.RELEASE</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework</groupId>-->
+        <!--            <artifactId>spring-oxm</artifactId>-->
+        <!--            <version>5.2.6.RELEASE</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.ws</groupId>-->
+        <!--            <artifactId>spring-ws-core</artifactId>-->
+        <!--            <version>3.0.9.RELEASE</version>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -112,18 +112,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
+<!--                <configuration>-->
+<!--                    <source>11</source>-->
+<!--                    <target>11</target>-->
+<!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.1.0</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
+<!--                <configuration>-->
+<!--                    <encoding>UTF-8</encoding>-->
+<!--                </configuration>-->
             </plugin>
 
             <!-- allows the route to be ran via 'mvn camel:run' -->
@@ -133,35 +133,35 @@
                 <version>${camel.version}</version>
             </plugin>
 
-<!--            &lt;!&ndash; 用來產生 SOAP WebService 的 Client Request/Response 物件 &ndash;&gt;-->
-<!--            <plugin>-->
-<!--                <groupId>org.jvnet.jaxb2.maven2</groupId>-->
-<!--                <artifactId>maven-jaxb2-plugin</artifactId>-->
-<!--                <version>0.14.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>generate</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <schemaLanguage>WSDL</schemaLanguage>-->
-<!--                    <generatePackage>org.example.wsdl</generatePackage>-->
-<!--                    <generateDirectory>${basedir}/src/main/java</generateDirectory>-->
-<!--                    <schemas>-->
-<!--                        <schema>-->
-<!--                            &lt;!&ndash; Defaults to schemaDirectory. &ndash;&gt;-->
-<!--                            <directory>${basedir}/src/main/resources/schemas</directory>-->
-<!--                            &lt;!&ndash; Defaults to schemaIncludes. &ndash;&gt;-->
-<!--                            <includes>-->
-<!--                                <include>*.wsdl</include>-->
-<!--                            </includes>-->
-<!--&lt;!&ndash;                            <url>http://www.dneonline.com/calculator.asmx?wsdl</url>&ndash;&gt;-->
-<!--                        </schema>-->
-<!--                    </schemas>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <!-- 用來產生 SOAP WebService 的 Client Request/Response 物件 -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.14.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaLanguage>WSDL</schemaLanguage>
+                    <generatePackage>org.example.wsdl</generatePackage>
+                    <generateDirectory>${basedir}/src/main/java</generateDirectory>
+                    <schemas>
+                        <schema>
+                            <fileset>
+                                <directory>${basedir}/src/main/resources/schemas</directory>
+                                <includes>
+                                    <include>*.wsdl</include>
+                                </includes>
+                                <!--<url>http://www.dneonline.com/calculator.asmx?wsdl</url>-->
+                            </fileset>
+                        </schema>
+                    </schemas>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

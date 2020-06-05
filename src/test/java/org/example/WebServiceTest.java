@@ -22,12 +22,6 @@ public class WebServiceTest extends TestSupport {
 
   // endregion
 
-//  @Autowired
-//  public WebServiceTest(WsClient wsClient) {
-//
-//    this.wsClient = wsClient;
-//  }
-
   // region Methods
 
   @Test

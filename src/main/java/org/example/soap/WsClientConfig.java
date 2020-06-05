@@ -3,6 +3,9 @@ package org.example.soap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.ws.WebServiceMessageFactory;
+import org.springframework.ws.soap.SoapVersion;
+import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
 @Configuration
 public class WsClientConfig {
@@ -12,9 +15,17 @@ public class WsClientConfig {
   // endregion
 
   // region Methods
+  @Bean
+  public WebServiceMessageFactory messageFactory() {
+
+    SaajSoapMessageFactory messageFactory = new SaajSoapMessageFactory();
+    messageFactory.setSoapVersion(SoapVersion.SOAP_12);
+    return messageFactory;
+  }
 
   /**
    * 設定轉換 Java Bean <-> XML 的轉換器 (Marshaller)
+   *
    * @return
    */
   @Bean
@@ -29,19 +40,23 @@ public class WsClientConfig {
     return marshaller;
   }
 
+
   /**
    * 設定 WebService Client
+   *
    * @param marshaller
    * @return
    */
   @Bean
-  public WsClient wsClient(Jaxb2Marshaller marshaller) {
+  public WsClient wsClient(Jaxb2Marshaller marshaller, WebServiceMessageFactory messageFactory) {
 
     WsClient client = new WsClient();
     // 默認對應的ws服務地址 client 請求中還能動態修改的
     client.setDefaultUri(WS_URL);
     client.setMarshaller(marshaller);// 指定轉換類
     client.setUnmarshaller(marshaller);
+    // 改變預設的 SOAP (1.1 -> 1.2)
+    client.setMessageFactory(messageFactory);
     return client;
   }
   // endregion
