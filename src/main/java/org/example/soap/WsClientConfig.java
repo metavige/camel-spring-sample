@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.WebServiceMessageFactory;
+import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.SoapVersion;
 import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 
@@ -11,7 +12,7 @@ import org.springframework.ws.soap.saaj.SaajSoapMessageFactory;
 public class WsClientConfig {
 
   // region Fields
-  private String WS_URL = "http://www.dneonline.com/calculator.asmx";
+  public final static String WS_URL = "http://www.dneonline.com/calculator.asmx";
   // endregion
 
   // region Methods
@@ -26,7 +27,7 @@ public class WsClientConfig {
   /**
    * 設定轉換 Java Bean <-> XML 的轉換器 (Marshaller)
    *
-   * @return
+   * @return 回傳 @see Jaxb2Marshaller
    */
   @Bean
   public Jaxb2Marshaller marshaller() {
@@ -40,6 +41,14 @@ public class WsClientConfig {
     return marshaller;
   }
 
+  @Bean
+  public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller, WebServiceMessageFactory messageFactory) {
+
+    WebServiceTemplate webServiceTemplate = new WebServiceTemplate(messageFactory);
+    webServiceTemplate.setMarshaller(marshaller);
+    webServiceTemplate.setUnmarshaller(marshaller);
+    return webServiceTemplate;
+  }
 
   /**
    * 設定 WebService Client
@@ -50,13 +59,13 @@ public class WsClientConfig {
   @Bean
   public WsClient wsClient(Jaxb2Marshaller marshaller, WebServiceMessageFactory messageFactory) {
 
-    WsClient client = new WsClient();
+    WsClient client = new WsClient(messageFactory);
     // 默認對應的ws服務地址 client 請求中還能動態修改的
     client.setDefaultUri(WS_URL);
     client.setMarshaller(marshaller);// 指定轉換類
     client.setUnmarshaller(marshaller);
     // 改變預設的 SOAP (1.1 -> 1.2)
-    client.setMessageFactory(messageFactory);
+//    client.setMessageFactory(messageFactory);
     return client;
   }
   // endregion

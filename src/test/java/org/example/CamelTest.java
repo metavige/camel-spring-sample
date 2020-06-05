@@ -3,10 +3,14 @@ package org.example;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.dataformat.bindy.csv.BindyCsvDataFormat;
+import org.apache.camel.model.dataformat.JaxbDataFormat;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.example.data.CompositeData;
 import org.example.data.DetailData;
 import org.example.data.MasterData;
+import org.example.soap.WsClientConfig;
+import org.example.wsdl.Add;
+import org.example.wsdl.AddResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +27,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({
+@ContextConfiguration(locations = {
   "classpath:META-INF/spring/camel-context-test.xml"
 })
 public class CamelTest extends CamelTestSupport {
@@ -38,6 +43,7 @@ public class CamelTest extends CamelTestSupport {
 
   /**
    * 測試抓出 MockEndpoint 的資料，並判斷結果
+   *
    * @throws Exception
    */
   @Test
@@ -149,6 +155,7 @@ public class CamelTest extends CamelTestSupport {
 
   /**
    * 測試 Split + Aggregator
+   *
    * @throws Exception
    */
   @Test
@@ -162,15 +169,15 @@ public class CamelTest extends CamelTestSupport {
         from("direct:in")
           .log("${header.myId}")
           .split()
-            .tokenize(System.lineSeparator(), 1)
-            .aggregationStrategy(new CompositeAggregateStrategy())
-            //.log("${exchangeProperty.CamelSplitIndex}")
-            .choice()
-              .when(simple("${exchangeProperty.CamelSplitIndex} == 0"))
-                .unmarshal(new BindyCsvDataFormat(MasterData.class))
-              .when(simple("${exchangeProperty.CamelSplitIndex} > 0"))
-                .unmarshal(new BindyCsvDataFormat(DetailData.class))
-            .end()
+          .tokenize(System.lineSeparator(), 1)
+          .aggregationStrategy(new CompositeAggregateStrategy())
+          //.log("${exchangeProperty.CamelSplitIndex}")
+          .choice()
+          .when(simple("${exchangeProperty.CamelSplitIndex} == 0"))
+          .unmarshal(new BindyCsvDataFormat(MasterData.class))
+          .when(simple("${exchangeProperty.CamelSplitIndex} > 0"))
+          .unmarshal(new BindyCsvDataFormat(DetailData.class))
+          .end()
           .end()
           .to("mock:out");
       }
