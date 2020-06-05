@@ -11,7 +11,15 @@
 
     <name>A Camel Spring Route</name>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.0.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
     <properties>
+        <camel.version>3.3.0</camel.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -22,7 +30,7 @@
             <dependency>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-parent</artifactId>
-                <version>3.3.0</version>
+                <version>${camel.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -38,18 +46,17 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring-main</artifactId>
         </dependency>
 
-        <!-- logging -->
+        <!-- logging
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency> -->
 
         <!-- testing -->
         <dependency>
@@ -70,6 +77,31 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bindy</artifactId>
         </dependency>
+
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 生產wsdl文件
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework</groupId>-->
+<!--            <artifactId>spring-oxm</artifactId>-->
+<!--            <version>5.2.6.RELEASE</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.ws</groupId>-->
+<!--            <artifactId>spring-ws-core</artifactId>-->
+<!--            <version>3.0.9.RELEASE</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -98,7 +130,37 @@
             <plugin>
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>${camel.version}</version>
+            </plugin>
+
+            <!-- 用來產生 SOAP WebService 的 Client Request/Response 物件 -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.14.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaLanguage>WSDL</schemaLanguage>
+                    <generatePackage>org.example.wsdl</generatePackage>
+                    <generateDirectory>${basedir}/src/main/java</generateDirectory>
+                    <schemas>
+                        <schema>
+                            <!-- Defaults to schemaDirectory. -->
+                            <directory>${basedir}/src/main/resources/schemas</directory>
+                            <!-- Defaults to schemaIncludes. -->
+                            <includes>
+                                <include>*.wsdl</include>
+                            </includes>
+<!--                            <url>http://www.dneonline.com/calculator.asmx?wsdl</url>-->
+                        </schema>
+                    </schemas>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -147,3 +147,6 @@ Temporary Items
 .idea
 .settings 
 .vscode
+
+# ignore ws generate code
+src/main/java/org/example/wsdl
