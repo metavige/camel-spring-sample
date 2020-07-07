@@ -3,6 +3,7 @@ package org.example;
 import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.component.ssh.SshResult;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.camel.test.spring.CamelSpringRunner;
 import org.apache.camel.test.spring.CamelTestContextBootstrapper;
@@ -35,8 +36,7 @@ public class SshTest extends CamelTestSupport {
         // 需要先建立了一個虛擬環境以及使用 cloud-init 的設定方式，建立好一組 ssh key
         // 這邊直接使用 (至於 IP，先行寫死，啟動好 multipass 虛擬機之後，再行取得)
         from("direct:in")
-          .to("ssh:ubuntu@192.168.64.8?certResource=classpath:test_rsa&runLoggingLevel=INFO&timeout=5000")
-          //          .log("${body}")
+          .to("ssh:ubuntu@192.168.64.8?certResource=classpath:test_rsa&timeout=5000")
           .convertBodyTo(String.class, "UTF-8")
           .to("mock:out");
 
@@ -50,21 +50,23 @@ public class SshTest extends CamelTestSupport {
     // 1. Assign
     String message = "Hello World\n";
     MockEndpoint mockEndpoint = getMockEndpoint("mock:out");
-    mockEndpoint.expectedMessagesMatches(m -> {
-      Message outputMess = m.getMessage();
-      log.debug("return ssh result: {}", outputMess.getBody().toString());
-      assertEquals(message, outputMess.getBody());
-
-      // For Debug, Print All Headers
-      //      outputMess.getHeaders().forEach((k, v) -> {
-      //        log.info("Header: {} -> {}", k, v.toString());
-      //      });
-
-      // 執行命令的 ExitCode 應該是 0 (表示正確結束)
-      assertEquals(0, outputMess.getHeader("CamelSshExitValue"));
-
-      return true;
-    });
+    mockEndpoint.expectedBodiesReceived(message);
+    mockEndpoint.expectedHeaderReceived(SshResult.EXIT_VALUE, 0);
+//    mockEndpoint.expectedMessagesMatches(m -> {
+//      Message outputMess = m.getMessage();
+//      log.debug("return ssh result: {}", outputMess.getBody().toString());
+//      assertEquals(message, outputMess.getBody());
+//
+//      // For Debug, Print All Headers
+//      //      outputMess.getHeaders().forEach((k, v) -> {
+//      //        log.info("Header: {} -> {}", k, v.toString());
+//      //      });
+//
+//      // 執行命令的 ExitCode 應該是 0 (表示正確結束)
+//      assertEquals(0, outputMess.getHeader(SshResult.EXIT_VALUE));
+//
+//      return true;
+//    });
 
     //    mockEndpoint.expectedBodiesReceived(message);
 
@@ -81,19 +83,16 @@ public class SshTest extends CamelTestSupport {
 
     // 1. Assign
     MockEndpoint mockEndpoint = getMockEndpoint("mock:out");
+    // 執行命令的 ExitCode 應該是 127 (表示指令找不到 command not found)
+    mockEndpoint.expectedHeaderReceived(SshResult.EXIT_VALUE, 127);
     mockEndpoint.expectedMessagesMatches(m -> {
       Message outputMess = m.getMessage();
 
-      // For Debug, Print All Headers
-      //      outputMess.getHeaders().forEach((k, v) -> {
-      //        log.info("Header: {} -> {}", k, v.toString());
-      //      });
-
-      // 執行命令的 ExitCode 應該是 0 (表示正確結束)
-      assertNotEquals(0, outputMess.getHeader("CamelSshExitValue"));
+//      // 執行命令的 ExitCode 不應該是 0
+//      assertNotEquals(0, outputMess.getHeader(SshResult.EXIT_VALUE));
 
       // 印出錯誤訊息
-      ByteArrayInputStream errorOutputStream = outputMess.getHeader("CamelSshStderr", ByteArrayInputStream.class);
+      ByteArrayInputStream errorOutputStream = outputMess.getHeader(SshResult.STDERR, ByteArrayInputStream.class);
       try {
         String errors = convertToString(errorOutputStream);
         log.error(errors);
@@ -113,34 +112,15 @@ public class SshTest extends CamelTestSupport {
   }
 
   @Test
-  public void runLongProcessCommand() throws InterruptedException {
+  public void runLongTimeCommand() throws InterruptedException {
     // 1. Assign
     MockEndpoint mockEndpoint = getMockEndpoint("mock:out");
-    mockEndpoint.expectedMessagesMatches(m -> {
-      Message outputMess = m.getMessage();
-      log.debug("return ssh result: {}", outputMess.getBody().toString());
-      // For Debug, Print All Headers
-      //      outputMess.getHeaders().forEach((k, v) -> {
-      //        log.info("Header: {} -> {}", k, v.toString());
-      //      });
-
-      // 執行命令的 ExitCode 應該是 0 (表示正確結束)
-      assertEquals(0, outputMess.getHeader("CamelSshExitValue"));
-//
-//      // 印出錯誤訊息
-//      ByteArrayInputStream errorOutputStream = outputMess.getHeader("CamelSshStderr", ByteArrayInputStream.class);
-//      try {
-//        String errors = convertToString(errorOutputStream);
-//        log.error(errors);
-//      }
-//      catch (Exception e) {
-//        throw new RuntimeException(e);
-//      }
-
-      return true;
-    });
+    // 執行命令的 ExitCode 應該是 0 (表示正確結束)
+    mockEndpoint.expectedHeaderReceived(SshResult.EXIT_VALUE, 0);
 
     // 2. Act
+
+    // 這邊執行一個很長時間的指令，看會怎樣
     template.sendBody("direct:in", "for i in {1..15}; do echo \"$i\"; sleep 1; done");
 
     // 3. Assert
